@@ -1,0 +1,5 @@
+{
+  "name": "Google Sheet AI Chat 2",
+  "description": "An application that displays data from a Google Sheet in a card format and allows users to ask an AI questions about the data.",
+  "requestFramePermissions": []
+}
