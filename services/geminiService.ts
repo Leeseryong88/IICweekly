@@ -53,7 +53,7 @@ ${JSON.stringify(filteredContextData, null, 2)}
 ---`;
 
     const chat = ai.chats.create({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-lite',
         config: {
             systemInstruction: systemInstruction,
         },
@@ -105,7 +105,7 @@ export const getAIReportSummary = async (data: SheetRow[], visibleFields: Visibl
     `;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-lite',
         contents: prompt,
     });
 
