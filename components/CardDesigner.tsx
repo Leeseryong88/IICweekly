@@ -160,6 +160,30 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ sheetUrl, initialConfig, on
   const handleAddGroup = () => setGroups(prev => [...prev, { label: '그룹', items: [] }]);
   const handleClear = () => { setTitleZone([]); setGroups([]); };
 
+  const moveGroup = (index: number, direction: -1 | 1) => {
+    setGroups(prev => {
+      const target = index + direction;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const moveItem = (groupIndex: number, itemIndex: number, direction: -1 | 1) => {
+    setGroups(prev => {
+      const group = prev[groupIndex];
+      if (!group) return prev;
+      const items = [...(group.items || [])];
+      const target = itemIndex + direction;
+      if (target < 0 || target >= items.length) return prev;
+      [items[itemIndex], items[target]] = [items[target], items[itemIndex]];
+      const next = [...prev];
+      next[groupIndex] = { ...group, items };
+      return next;
+    });
+  };
+
   const handleSave = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -318,6 +342,22 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ sheetUrl, initialConfig, on
           {groups.map((g, idx) => (
             <div key={idx} className="p-3 rounded-md border border-slate-700 bg-slate-900 space-y-2">
               <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => moveGroup(idx, -1)}
+                    disabled={idx === 0}
+                    className="px-1.5 py-0.5 text-[10px] leading-none rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="그룹 위로"
+                  >▲</button>
+                  <button
+                    type="button"
+                    onClick={() => moveGroup(idx, 1)}
+                    disabled={idx === groups.length - 1}
+                    className="px-1.5 py-0.5 text-[10px] leading-none rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="그룹 아래로"
+                  >▼</button>
+                </div>
                 <input value={g.label || ''} onChange={(e)=>{
                   const next=[...groups]; next[idx] = { ...next[idx], label: e.target.value } as any; setGroups(next);
                 }} placeholder="그룹 제목" className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded p-1.5 flex-1" />
@@ -343,6 +383,10 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ sheetUrl, initialConfig, on
                     {(g.items||[]).map((it:any, j:number) => (
                       it.type==='data' ? (
                         <div key={j} className="flex items-center gap-2 bg-slate-700 border border-slate-600 rounded px-2 py-1">
+                          <div className="flex flex-col gap-0.5">
+                            <button type="button" onClick={() => moveItem(idx, j, -1)} disabled={j === 0} className="px-1 py-0.5 text-[9px] leading-none rounded bg-slate-800 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed" title="항목 왼쪽/위로">▲</button>
+                            <button type="button" onClick={() => moveItem(idx, j, 1)} disabled={j === (g.items || []).length - 1} className="px-1 py-0.5 text-[9px] leading-none rounded bg-slate-800 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed" title="항목 오른쪽/아래로">▼</button>
+                          </div>
                           <span className="text-xs">{it.field}</span>
                           <select value={it.size||3} onChange={(e)=>{ const next=[...groups]; (next[idx].items as any)[j] = { ...it, size: Number(e.target.value) }; setGroups(next); }} className="bg-slate-800 border border-slate-700 text-slate-200 text-[11px] rounded p-1">
                             {[1,2,3,4,5].map(n => (
@@ -354,6 +398,10 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ sheetUrl, initialConfig, on
                         </div>
                       ) : (
                         <div key={j} className="flex items-center gap-2 bg-slate-700 border border-slate-600 rounded px-2 py-1">
+                          <div className="flex flex-col gap-0.5">
+                            <button type="button" onClick={() => moveItem(idx, j, -1)} disabled={j === 0} className="px-1 py-0.5 text-[9px] leading-none rounded bg-slate-800 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed" title="항목 왼쪽/위로">▲</button>
+                            <button type="button" onClick={() => moveItem(idx, j, 1)} disabled={j === (g.items || []).length - 1} className="px-1 py-0.5 text-[9px] leading-none rounded bg-slate-800 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed" title="항목 오른쪽/아래로">▼</button>
+                          </div>
                           <input value={it.text||''} onChange={(e)=>{ const next=[...groups]; (next[idx].items as any)[j] = { ...it, text: e.target.value, type:'text' }; setGroups(next); }} placeholder="텍스트" className="bg-slate-800 border border-slate-700 text-slate-200 text-[11px] rounded p-1" />
                           <button onClick={()=>{ const next=[...groups]; (next[idx].items as any).splice(j,1); setGroups(next); }} className="text-[11px] px-1.5 py-0.5 rounded bg-rose-700 text-white">삭제</button>
                         </div>
